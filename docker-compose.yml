@@ -22,9 +22,9 @@ services:
    # from our webserver.
    #
    php:
+     image: wordpress:5.0.0-fpm
      depends_on:
        - db
-     image: wordpress:5.0.0-fpm
      restart: always
      volumes:
        #
@@ -42,9 +42,9 @@ services:
        WORDPRESS_DB_PASSWORD: wordpress
 
    web:
+     image: nginx
      depends_on:
        - php
-     image: nginx
      restart: always
      volumes:
        #
@@ -60,8 +60,28 @@ services:
        # rotated on the parent system.
        #
        - ./logs:/var/log/nginx
-     ports:
-       - 8080:80
      
+
+   https-portal:
+     image: steveltn/https-portal:1
+     depends_on:
+       - web
+     ports:
+       - 80:80
+       - 443:443
+     restart: always
+     #
+     # Save our SSL certs between runs so they aren't regenerated on every single run.
+     #
+     volumes:
+       - ./ssl_certs:/var/lib/https-portal
+     environment:
+       DOMAINS: 'localhost -> http://web:80 #local'
+       #DOMAINS: 'YOUR_FQDN -> http://web:80 #staging' # Uncomment when you want to test a staging cert.
+       #DOMAINS: 'YOUR_FQDN -> http://web:80 #production' # Uncomment when you are ready for production.
+       #
+       # Allow larger files to be uploaded
+       #
+       CLIENT_MAX_BODY_SIZE: 64M
 
 
