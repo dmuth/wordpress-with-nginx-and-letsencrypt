@@ -22,7 +22,7 @@ services:
    # from our webserver.
    #
    php:
-     image: wordpress:5.0.0-fpm
+     image: wordpress:5-fpm
      depends_on:
        - db
      restart: always
